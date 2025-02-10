@@ -27,5 +27,12 @@ Options -Indexes
 </FilesMatch>
 
 RewriteEngine On
+
+# Manter a regra para Authorization header
 RewriteCond %{HTTP:Authorization} ^(.*)
-RewriteRule .* - [e=HTTP_AUTHORIZATION:%1] 
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+# Redirecionar todas as requisições para o router.php, exceto arquivos/diretórios existentes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ router.php [QSA,L] 

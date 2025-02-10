@@ -18,10 +18,10 @@ class Router {
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
         // Melhoria no tratamento do path base
-        $basePath = '/notion-media-sync-php';
-        if (strpos($path, $basePath) === 0) {
-            $path = substr($path, strlen($basePath));
-        }
+        // $basePath = '/notion-media-sync-php';
+        // if (strpos($path, $basePath) === 0) {
+        //     $path = substr($path, strlen($basePath));
+        // }
         
         // Garantir que o path comece com /
         $path = '/' . ltrim($path, '/');

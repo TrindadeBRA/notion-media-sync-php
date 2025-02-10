@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://localhost:8000
     description: Servidor de Desenvolvimento
-  - url: https://nms-php.thetrinityweb.com.br/notion-media-sync-php
+  - url: https://nms-php.thetrinityweb.com.br
     description: Servidor de Produção
 
 components:
