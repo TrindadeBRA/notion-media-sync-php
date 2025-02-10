@@ -41,21 +41,28 @@ class Router {
 
     private function validateApiToken() {
         $headers = getallheaders();
-        $authHeader = $headers['Authorization'] ?? '';
+        if ($headers === false) {
+            $this->sendAuthError(500, 'Erro ao ler cabeçalhos da requisição');
+        }
+        
+        $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : 
+                     (isset($headers['authorization']) ? $headers['authorization'] : '');
         
         if (empty($authHeader) || !preg_match('/Bearer\s+(.*)/', $authHeader, $matches)) {
-            header('Content-Type: application/json; charset=utf-8');
-            http_response_code(401);
-            die(json_encode(['error' => 'Token de autenticação não fornecido'], JSON_UNESCAPED_UNICODE));
+            $this->sendAuthError(401, 'Token de autenticação não fornecido');
         }
         
         $token = $matches[1];
         
         if ($token !== API_KEY) {
-            header('Content-Type: application/json; charset=utf-8');
-            http_response_code(403);
-            die(json_encode(['error' => 'Token de autenticação inválido'], JSON_UNESCAPED_UNICODE));
+            $this->sendAuthError(403, 'Token de autenticação inválido');
         }
+    }
+
+    private function sendAuthError($statusCode, $message) {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code($statusCode);
+        die(json_encode(['error' => $message], JSON_UNESCAPED_UNICODE));
     }
 }
 
