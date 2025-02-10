@@ -1,0 +1,165 @@
+openapi: 3.0.0
+info:
+  title: API de Sincronização de Imagens
+  version: 1.0.0
+  description: API para sincronizar imagens do Notion
+
+servers:
+  - url: http://localhost:8000
+    description: Servidor de Desenvolvimento
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Token de autenticação para acessar a API.
+        Formato: Bearer <API_KEY>
+        Exemplo: Bearer your-api-key-here
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro
+        code:
+          type: integer
+          description: Código do erro
+
+paths:
+  /sync_image:
+    post:
+      summary: Sincroniza uma imagem do Notion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileUrl:
+                  type: string
+                  description: URL da imagem do Notion
+                fileFolder:
+                  type: string
+                  description: Pasta onde a imagem será salva
+              required:
+                - fileUrl
+                - fileFolder
+            example:
+              fileUrl: "https://conteudo.thetrinityweb.com.br/wp-content/uploads/2024/10/setup.webp"
+              fileFolder: "teste"
+      responses:
+        '200':
+          description: Imagem sincronizada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  url:
+                    type: string
+                    description: URL completa do arquivo salvo
+                  isExisting:
+                    type: boolean
+                    description: Indica se o arquivo já existia no servidor
+              example:
+                success: true
+                url: "/file-uploads/teste/analise-desenvolvimento-de-sistemas.webp"
+                isExisting: false
+        '400':
+          description: Parâmetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Pasta não fornecida"
+                code: 400
+        '404':
+          description: URL da imagem inválida ou arquivo não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "URL da imagem inválida ou arquivo não encontrado"
+                code: 404
+        '405':
+          description: Método não permitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Método não permitido"
+                code: 405
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Erro ao salvar o arquivo"
+                code: 500
+        '401':
+          description: Não autorizado - Token inválido ou ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Token de autenticação inválido ou ausente"
+                code: 401
+      security:
+        - BearerAuth: []
+
+  /health:
+    get:
+      summary: Verifica o status da API
+      description: Retorna o status atual da API e a data
+      responses:
+        '200':
+          description: Status da API
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status atual da API
+                  date:
+                    type: string
+                    description: Data e hora atual
+              example:
+                status: "healthy"
+                date: "20/03/2024 14:30:45"
+        '401':
+          description: Não autorizado - Token inválido ou ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Token de autenticação inválido ou ausente"
+                code: 401
+      security:
+        - BearerAuth: []
+
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: Authorization
+    description: Insira sua API key usando o formato 'Bearer your-api-key'
+
+security:
+  - ApiKeyAuth: [] 

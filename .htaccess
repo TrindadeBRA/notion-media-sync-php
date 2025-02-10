@@ -1,0 +1,31 @@
+<IfModule mod_php.ini>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+# Negar acesso a todos os arquivos .php na pasta config
+<FilesMatch "^config\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Proteger o arquivo .htaccess
+<Files .htaccess>
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Desabilitar listagem de diretórios
+Options -Indexes
+
+# Bloquear acesso a arquivos sensíveis
+<FilesMatch "^(README|COPYING|LICENSE|composer\.(json|lock))$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1] 
