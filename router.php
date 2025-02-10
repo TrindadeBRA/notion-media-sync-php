@@ -40,29 +40,38 @@ class Router {
     }
 
     private function validateApiToken() {
-        $headers = getallheaders();
-        if ($headers === false) {
-            $this->sendAuthError(500, 'Erro ao ler cabeçalhos da requisição');
-        }
-        
-        $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : 
-                     (isset($headers['authorization']) ? $headers['authorization'] : '');
-        
-        if (empty($authHeader) || !preg_match('/Bearer\s+(.*)/', $authHeader, $matches)) {
-            $this->sendAuthError(401, 'Token de autenticação não fornecido');
-        }
-        
-        $token = $matches[1];
-        
-        if ($token !== API_KEY) {
-            $this->sendAuthError(403, 'Token de autenticação inválido');
+        try {
+            $headers = getallheaders();
+            if ($headers === false || !is_array($headers)) {
+                $this->sendAuthError(500, 'Erro ao ler cabeçalhos da requisição');
+            }
+            
+            $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : 
+                         (isset($headers['authorization']) ? $headers['authorization'] : '');
+            
+            if (empty($authHeader)) {
+                $this->sendAuthError(401, 'Token de autenticação não fornecido');
+            }
+            
+            if (!preg_match('/Bearer\s+(.*)/', $authHeader, $matches)) {
+                $this->sendAuthError(401, 'Formato de token inválido');
+            }
+            
+            $token = $matches[1];
+            
+            if ($token !== API_KEY) {
+                $this->sendAuthError(403, 'Token de autenticação inválido');
+            }
+        } catch (Exception $e) {
+            $this->sendAuthError(500, 'Erro interno ao validar token');
         }
     }
 
     private function sendAuthError($statusCode, $message) {
+        header('HTTP/1.1 ' . $statusCode);
         header('Content-Type: application/json; charset=utf-8');
-        http_response_code($statusCode);
-        die(json_encode(['error' => $message], JSON_UNESCAPED_UNICODE));
+        echo json_encode(['error' => $message], JSON_UNESCAPED_UNICODE);
+        exit();
     }
 }
 
