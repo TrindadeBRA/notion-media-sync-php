@@ -17,10 +17,14 @@ class Router {
         $method = $_SERVER['REQUEST_METHOD'];
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
-        
-        // Remove o caminho base da URL se necessário
+        // Melhoria no tratamento do path base
         $basePath = '/notion-media-sync-php';
-        $path = str_replace($basePath, '', $path);
+        if (strpos($path, $basePath) === 0) {
+            $path = substr($path, strlen($basePath));
+        }
+        
+        // Garantir que o path comece com /
+        $path = '/' . ltrim($path, '/');
 
         foreach ($this->routes as $route) {
             if ($route['method'] === $method && $route['path'] === $path) {
