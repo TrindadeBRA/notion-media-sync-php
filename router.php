@@ -1,4 +1,13 @@
 <?php
+// Adicionar essas linhas temporariamente para debug
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+require_once __DIR__ . '/config.php';
+
+if (!defined('API_KEY')) {
+    die('API_KEY não está definida');
+}
+
 class Router {
     private $routes = [];
 
@@ -40,38 +49,22 @@ class Router {
     }
 
     private function validateApiToken() {
-        try {
-            $headers = getallheaders();
-            if ($headers === false || !is_array($headers)) {
-                $this->sendAuthError(500, 'Erro ao ler cabeçalhos da requisição');
-            }
-            
-            $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : 
-                         (isset($headers['authorization']) ? $headers['authorization'] : '');
-            
-            if (empty($authHeader)) {
-                $this->sendAuthError(401, 'Token de autenticação não fornecido');
-            }
-            
-            if (!preg_match('/Bearer\s+(.*)/', $authHeader, $matches)) {
-                $this->sendAuthError(401, 'Formato de token inválido');
-            }
-            
-            $token = $matches[1];
-            
-            if ($token !== API_KEY) {
-                $this->sendAuthError(403, 'Token de autenticação inválido');
-            }
-        } catch (Exception $e) {
-            $this->sendAuthError(500, 'Erro interno ao validar token');
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? '';
+        
+        if (empty($authHeader) || !preg_match('/Bearer\s+(.*)/', $authHeader, $matches)) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(401);
+            die(json_encode(['error' => 'Token de autenticação não fornecido'], JSON_UNESCAPED_UNICODE));
         }
-    }
-
-    private function sendAuthError($statusCode, $message) {
-        header('HTTP/1.1 ' . $statusCode);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['error' => $message], JSON_UNESCAPED_UNICODE);
-        exit();
+        
+        $token = $matches[1];
+        
+        if ($token !== API_KEY) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(403);
+            die(json_encode(['error' => 'Token de autenticação inválido'], JSON_UNESCAPED_UNICODE));
+        }
     }
 }
 
