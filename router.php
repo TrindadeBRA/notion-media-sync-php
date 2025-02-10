@@ -17,6 +17,7 @@ class Router {
         $method = $_SERVER['REQUEST_METHOD'];
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
+        
         // Remove o caminho base da URL se necessário
         $basePath = '/notion-media-sync-php';
         $path = str_replace($basePath, '', $path);
