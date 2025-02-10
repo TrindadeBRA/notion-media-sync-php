@@ -7,6 +7,8 @@ info:
 servers:
   - url: http://localhost:8000
     description: Servidor de Desenvolvimento
+  - url: https://nms-php.thetrinityweb.com.br
+    description: Servidor de Produção
 
 components:
   securitySchemes:
